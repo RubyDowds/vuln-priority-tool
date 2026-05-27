@@ -4,7 +4,7 @@ Fetches Cisa Kev data, stores in pydantic model
 
 import requests
 import logging
-from models.vulnerability import VulnerabilityInfo
+from app.models.vulnerability import VulnerabilityInfo
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,15 +45,3 @@ class CisaKevClient:
         # self.logger.info(formatted_vulnerabilities)
         self.logger.info(f"Number: {len(formatted_vulnerabilities)}")
         return formatted_vulnerabilities
-
-
-
-
-
-
-
-
-
-
-
-
