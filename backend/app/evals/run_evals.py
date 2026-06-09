@@ -2,7 +2,7 @@ import logging
 from dotenv import load_dotenv
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, answer_correctness
+from ragas.metrics import faithfulness, answer_relevancy
 
 from app.db.database import SessionLocal
 from app.repositories.vulnerability_repository import VulnerabilityRepository
@@ -53,6 +53,6 @@ data = {
 }
 
 dataset = Dataset.from_dict(data)
-results = evaluate(dataset, metrics=[faithfulness, answer_relevancy, answer_correctness])
+results = evaluate(dataset, metrics=[faithfulness, answer_relevancy])
 print(results)
 
