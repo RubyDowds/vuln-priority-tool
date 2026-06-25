@@ -16,8 +16,10 @@ dataclasses-json==0.6.7
 datasets==4.8.5
 dill==0.4.1
 distro==1.9.0
+docker==7.1.0
 dotenv==0.9.9
 durationpy==0.10
+Faker==40.23.0
 fastapi==0.136.3
 filelock==3.29.0
 flatbuffers==25.12.19
