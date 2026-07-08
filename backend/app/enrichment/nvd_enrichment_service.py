@@ -1,5 +1,5 @@
 """
-Enrichment service parses the raw NVD response and enriches the Cisa KEV data
+NVD Enrichment service parses the raw NVD response and enriches the Cisa KEV data
 with CVSS, SSVC from NVD where available
 """
 import logging

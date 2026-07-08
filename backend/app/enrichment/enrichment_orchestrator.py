@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from app.clients.nvd_client import NVDClient
 from app.enrichment.nvd_enrichment_service import NVDEnrichmentService
 from app.repositories.vulnerability_repository import VulnerabilityRepository
+from clients.epss_client import EpssClient
+from enrichment.epss_enrichment_service import EpssEnrichmentService
 
 
 class EnrichmentOrchestrator:
@@ -23,11 +25,15 @@ class EnrichmentOrchestrator:
             self,
             repository: VulnerabilityRepository,
             enrichment_service: NVDEnrichmentService,
-            nvd_client: NVDClient
+            nvd_client: NVDClient,
+            epss_client: EpssClient,
+            epss_enrichment_service: EpssEnrichmentService,
     ):
         self.repository = repository
         self.enrichment_service = enrichment_service
         self.nvd_client = nvd_client
+        self.epss_client = epss_client
+        self.epss_enrichment_service = epss_enrichment_service
         self.logger = logging.getLogger(__name__)
 
     def run(self) -> None:
@@ -39,11 +45,14 @@ class EnrichmentOrchestrator:
         self.logger.info("Found {} vulnerabilities ending enrichment.".format(pending))
         cve_ids = [v.cve_id for v in pending]
 
+        # NVD enrichment
         nvd_data = self.nvd_client.fetch_all(cve_ids)
         self.enrichment_service.enrich(nvd_data)
 
-        # epss data
-        epss_data = self.epss_client
+        # EPSS enrichment - run for all CVEs, not just pending, as they change daily
+        all_cve_ids = [v.cve_id for v in self.repository.get_all()]
+        epss_data = self.epss_client.fetch_all(all_cve_ids)
+        self.epss_enrichment_service.enrich(epss_data)
 
     def _get_pending_enrichment(self):
         now = datetime.utcnow()
