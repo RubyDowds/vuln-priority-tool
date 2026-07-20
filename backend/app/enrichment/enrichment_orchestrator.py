@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from app.clients.nvd_client import NVDClient
 from app.enrichment.nvd_enrichment_service import NVDEnrichmentService
 from app.repositories.vulnerability_repository import VulnerabilityRepository
-from clients.epss_client import EpssClient
-from enrichment.epss_enrichment_service import EpssEnrichmentService
+from app.clients.epss_client import EpssClient
+from app.enrichment.epss_enrichment_service import EpssEnrichmentService
 
 
 class EnrichmentOrchestrator:

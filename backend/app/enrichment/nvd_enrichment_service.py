@@ -27,7 +27,7 @@ class NVDEnrichmentService:
 
             enriched = self._parse_nvd(cve_data)
             self._update(vuln, enriched)
-            self._derive_missing_ssvcs(vuln)
+            self._derive_missing_ssvc(vuln)
 
 
     def _parse_nvd(self, cve_data: dict) -> dict:

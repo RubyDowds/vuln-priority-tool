@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, UniqueConstraint
 
 from app.db.database import Base
 from datetime import datetime
@@ -24,3 +24,7 @@ class RemediationPriority(Base):
     # AI explanation
     reasoning = Column(String)
     calculated_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("asset_id", "cve_id", name="uq_asset_cve"),
+    )

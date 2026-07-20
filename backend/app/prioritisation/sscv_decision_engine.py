@@ -2,8 +2,8 @@
 Decision engine behind determining the vulnerability prioritisation. Takes a Vulnerability and an Asset
 together and computes the SSVC decision.
 """
-from models.db.vulnerability import Vulnerability
-from models.db.asset import Asset
+from app.models.db.vulnerability import Vulnerability
+from app.models.db.asset import Asset
 
 
 class SSVCDecisionEngine:

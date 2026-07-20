@@ -6,11 +6,12 @@ results via the PriorityRepository.
 from app.prioritisation.sscv_decision_engine import SSVCDecisionEngine
 from app.repositories.asset_repository import AssetRepository
 from app.repositories.vulnerability_repository import VulnerabilityRepository
-from repositories.priority_repository import PriorityRepository
+from app.repositories.priority_repository import PriorityRepository
 
 
 class PrioritisationOrchestrator:
-    def __init__(self, asset_repository: AssetRepository,
+    def __init__(self,
+                 asset_repository: AssetRepository,
                  vuln_repository: VulnerabilityRepository,
                  decision_engine: SSVCDecisionEngine,
                  priority_repository: PriorityRepository):
@@ -31,4 +32,5 @@ class PrioritisationOrchestrator:
                 continue
 
             priority = self.decision_engine.compute(asset, vuln)
+            print(priority)
             self.priority_repository.upsert(priority)

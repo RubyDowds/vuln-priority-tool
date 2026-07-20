@@ -95,3 +95,6 @@ class AssetRepository:
             .filter(AssetVulnerability.cve_id == cve_id)
             .all()
         )
+
+    def get_all_asset_vulnerabilities(self):
+        return self.session.query(AssetVulnerability).all()
