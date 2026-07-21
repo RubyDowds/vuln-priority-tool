@@ -1,0 +1,16 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${APP_PORT}:8000"
+    env_file:
+      - .env
+    volumes: # mounts local db files into the container so data persists between container restarts
+      - ./backend/kev.db:/app/kev.db
+      - ./backend/chroma_db:/app/chroma_db
+      - hf_cache:/app/.cache/huggingface
+
+volumes:
+  hf_cache:
