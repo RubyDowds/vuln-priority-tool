@@ -6,6 +6,7 @@ from app.db.database import SessionLocal
 from app.orchestration.vulnerability_analysis_orchestrator import VulnerabilityAnalysisOrchestrator, IntentParser
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.retrieval.vulnerability_retrieval_service import VulnerabilityRetrievalService
+from app.repositories.priority_repository import PriorityRepository
 
 
 def get_session():
@@ -26,3 +27,6 @@ def get_parser(retrieval=Depends(get_retrieval_service)) -> IntentParser:
 
 def get_orchestrator(retrieval=Depends(get_retrieval_service), parser=Depends(get_parser)) -> VulnerabilityAnalysisOrchestrator:
     return VulnerabilityAnalysisOrchestrator(retrieval, parser)
+
+def get_priority_repository(session: Session = Depends(get_session)) -> PriorityRepository:
+    return PriorityRepository(session)

@@ -32,3 +32,10 @@ class PriorityRepository:
             .filter(RemediationPriority.ssvc_decision == "immediate")
             .all()
         )
+
+    def get_all(self) -> list[RemediationPriority]:
+        return (
+            self.session.query(RemediationPriority)
+            .order_by(RemediationPriority.remediation_days.asc())
+            .all()
+        )
