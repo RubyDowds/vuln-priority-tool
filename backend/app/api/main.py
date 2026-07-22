@@ -1,10 +1,8 @@
 from fastapi import FastAPI
-from app.api.routes.vulnerabilities import router
-from app.db.database import Base, engine
+
+from app.api.routes.vulnerabilities import router as vuln_router
+from app.api.routes.priorities import router as priority_router
 
 app = FastAPI()
-app.include_router(router)
-
-@app.on_event("startup")
-def start_up():
-    Base.metadata.create_all(bind=engine)
+app.include_router(vuln_router)
+app.include_router(priority_router)
