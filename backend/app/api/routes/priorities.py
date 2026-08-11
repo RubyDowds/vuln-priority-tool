@@ -52,17 +52,7 @@ def get_priorities_for_asset(
 @router.post("/analyse", response_model=AnalyseResponse)
 def analyse(
     request: AnalyseRequest,
-    repo: PriorityRepository = Depends(get_priority_repository),
     orchestrator = Depends(get_orchestrator)
 ):
-    # fetch relevant priorities as context
-    if request.asset_id:
-        priorities = repo.get_by_asset(request.asset_id)
-    else:
-        priorities = repo.get_all()
-
-    answer = orchestrator.analyse(
-        question=request.question,
-        priorities=priorities
-    )
+    answer = orchestrator.analyse(question=request.question)
     return AnalyseResponse(answer=answer)

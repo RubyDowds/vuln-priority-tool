@@ -7,6 +7,8 @@ from app.orchestration.vulnerability_analysis_orchestrator import VulnerabilityA
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.retrieval.vulnerability_retrieval_service import VulnerabilityRetrievalService
 from app.repositories.priority_repository import PriorityRepository
+from app.embeddings.vulnerability_embedding_service import VulnerabilityEmbeddingService
+from app.embeddings.priority_embedding_service import PriorityEmbeddingService
 
 
 def get_session():
@@ -25,8 +27,14 @@ def get_retrieval_service(repo=Depends(get_repository)) -> VulnerabilityRetrieva
 def get_parser(retrieval=Depends(get_retrieval_service)) -> IntentParser:
     return IntentParser(retrieval)
 
-def get_orchestrator(retrieval=Depends(get_retrieval_service), parser=Depends(get_parser)) -> VulnerabilityAnalysisOrchestrator:
-    return VulnerabilityAnalysisOrchestrator(retrieval, parser)
+# def get_vuln_embedding_service(repo=Depends(get_repository)) -> VulnerabilityEmbeddingService:
+#     return VulnerabilityEmbeddingService(repo)
+
+def get_priority_embedding_service(repo=Depends(get_repository)) -> PriorityEmbeddingService:
+    return PriorityEmbeddingService(repo)
+
+def get_orchestrator(retrieval=Depends(get_retrieval_service), parser=Depends(get_parser), embedding=Depends(get_priority_embedding_service)) -> VulnerabilityAnalysisOrchestrator:
+    return VulnerabilityAnalysisOrchestrator(retrieval, parser, embedding)
 
 def get_priority_repository(session: Session = Depends(get_session)) -> PriorityRepository:
     return PriorityRepository(session)

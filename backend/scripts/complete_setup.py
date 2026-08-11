@@ -11,6 +11,7 @@ scripts = [
     "scripts.generate_mock_assets",
     "scripts.run_enrichment",
     "scripts.run_prioritisation",
+    "scripts.run_embeddings",
 ]
 
 for script in scripts:
