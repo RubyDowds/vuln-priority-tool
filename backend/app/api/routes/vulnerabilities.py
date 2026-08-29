@@ -7,6 +7,7 @@ from app.orchestration.vulnerability_analysis_orchestrator import VulnerabilityA
 
 router = APIRouter()
 
+#todo also remove?
 class AnalyseRequest(BaseModel):
     question: str
     vendor: str | None = None

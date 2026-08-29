@@ -8,7 +8,7 @@ from app.vector_store import chroma_client
 
 
 class PriorityEmbeddingService:
-    def __init__(self, repository: PriorityRepository):
+    def __init__(self, repository: PriorityRepository | None = None):
         self.repository = repository # init take the repository, to read from sqlite
         self.model = SentenceTransformer("all-MiniLM-L6-v2") # model to convert text dense vectors
         self.collection = chroma_client.get_priorities_collection()
