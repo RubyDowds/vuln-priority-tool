@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 
 from app.repositories.priority_repository import PriorityRepository
-from vector_store import chroma_client
+from app.vector_store import chroma_client
 
 
 class PriorityRetrievalService:

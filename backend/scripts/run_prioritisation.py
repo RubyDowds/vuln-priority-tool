@@ -9,7 +9,7 @@ from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.enrichment.nvd_enrichment_service import NVDEnrichmentService
 from app.repositories.asset_repository import AssetRepository
 from app.repositories.priority_repository import PriorityRepository
-from app.prioritisation.sscv_decision_engine import SSVCDecisionEngine
+from app.prioritisation.ssvc_decision_engine import SSVCDecisionEngine
 from app.orchestration.prioritisation_orchestrator import PrioritisationOrchestrator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
-from app.orchestration.vulnerability_analysis_orchestrator import VulnerabilityAnalysisOrchestrator
+from app.orchestration.priority_analysis_orchestrator import VulnerabilityAnalysisOrchestrator
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.retrieval.vulnerability_retrieval_service import VulnerabilityRetrievalService
 from app.repositories.priority_repository import PriorityRepository
