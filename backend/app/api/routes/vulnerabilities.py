@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_orchestrator
-from app.orchestration.vulnerability_analysis_orchestrator import VulnerabilityAnalysisOrchestrator
+from app.orchestration.priority_analysis_orchestrator import PriorityAnalysisOrchestrator
 
 router = APIRouter()
 
@@ -17,14 +17,12 @@ class AnalyseRequest(BaseModel):
 class AnalyseResponse(BaseModel):
     answer: str
 
+#todo not sure what im using this for
 @router.post("/analyse", response_model=AnalyseResponse)
 def analyse(
         request: AnalyseRequest,
-        orchestrator: VulnerabilityAnalysisOrchestrator = Depends(get_orchestrator),
+        orchestrator: PriorityAnalysisOrchestrator = Depends(get_orchestrator),
 ):
     answer = orchestrator.analyse(
-        question=request.question,
-        vendor=request.vendor,
-        product=request.product,
-        days=request.days)
+        question=request.question)
     return AnalyseResponse(answer=answer)

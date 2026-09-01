@@ -1,10 +1,12 @@
 """
-Owns the full request/response cycle
+Answers questions against already-computed priority data, now also the home for agent tool logic.
+Runs per-request, every time someone asks something.
 """
 import logging
 from openai import OpenAI
 
-from app.embeddings.priority_embedding_service import PriorityEmbeddingService
+from app.repositories.priority_repository import PriorityRepository
+from app.retrieval.priority_retrieval_service import PriorityRetrievalService
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,11 +14,13 @@ logging.basicConfig(
 )
 
 
-class VulnerabilityAnalysisOrchestrator:
+class PriorityAnalysisOrchestrator:
     MODEL = "gpt-4o-mini"
 
-    def __init__(self, priority_embedding_service: PriorityEmbeddingService):
-        self.priority_embedding_service = priority_embedding_service
+    def __init__(self, priority_repository: PriorityRepository,
+                 priority_retrieval_service: PriorityRetrievalService,):
+        self.priority_retrieval_service = priority_retrieval_service
+        self.priority_repository = priority_repository
         self.client = OpenAI()  # picks up OPENAI_API_KEY from environment
         self.logger = logging.getLogger(__name__)
 
@@ -29,9 +33,9 @@ class VulnerabilityAnalysisOrchestrator:
         :return: response from the LLM
         """
         # semantic search over priority embeddings
-        relevant = self.priority_embedding_service.semantic_search(question)
+        relevant = self.priority_retrieval_service.priority_semantic_search(question)
 
-        context = self.build_priority_context_from_metadata(relevant)
+        context = self.priority_retrieval_service.build_priority_context_from_metadata(relevant)
         prompt = f"""You are a security analyst assistant helping prioritise vulnerability remediation.
             Use only the prioritisation data below to answer the question.
             If the data doesn't contain enough information, say so.
@@ -43,22 +47,6 @@ class VulnerabilityAnalysisOrchestrator:
             Question: {question}
             Answer:"""
         return self._call_llm(prompt)
-
-    @staticmethod
-    def build_priority_context_from_metadata(meta_data_list: list) -> str:
-        if not meta_data_list:
-            return "No prioritisation data available."
-
-        chunks = []
-        for m in meta_data_list:
-            chunk = f"""Asset: {m.get('asset_id')}
-                CVE: {m.get('cve_id')}
-                Decision: {m.get('ssvc_decision')} ({m.get('remediation_days')} days)
-                Automatable: {m.get('automatable')}
-                Technical Impact: {m.get('technical_impact')}""".strip()
-            chunks.append(chunk)
-
-        return "\n\n---\n\n".join(chunks)
 
 
     def _call_llm(self, prompt: str):
