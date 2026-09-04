@@ -3,16 +3,19 @@ Definitions of tool schemas and functions that get called by the model.
 """
 from app.repositories.priority_repository import PriorityRepository
 from app.retrieval.priority_retrieval_service import PriorityRetrievalService
+from app.repositories.vulnerability_repository import VulnerabilityRepository
 
 
 class Tools:
     def __init__(self, priority_repository: PriorityRepository,
-                 priority_retrieval_service: PriorityRetrievalService) -> None:
+                 priority_retrieval_service: PriorityRetrievalService,
+                 vulnerability_repository: VulnerabilityRepository) -> None:
         self.priority_repository = priority_repository
         self.priority_retrieval_service = priority_retrieval_service
+        self.vulnerability_repository = vulnerability_repository
         self._dispatch = {
             "search_priorities": self.search_priorities,
-            "lookup_priority_by_cve": self.lookup_priority_by_cve,
+            "lookup_cve_details": self.lookup_cve_details,
         }
 
     tools = [
@@ -31,13 +34,15 @@ class Tools:
                     },
                 },
                 "required": ["question"],
-            },
+            }
         },
         {
             "type": "function",
-            "name": "lookup_priority_by_cve",
-            "description": "Exact lookup of the prioritisation decision for a specific CVE ID. Use this when the user "
-                           "asks about a named CVE, rather than a general or fuzzy question about what to patch.",
+            "name": "lookup_cve_details",
+            "description": "Full lookup for a specific CVE: vulnerability facts (what it is, "
+                   "affected vendor/product) plus organisational exposure (which of "
+                   "our assets are affected and their remediation priority, if any). "
+                   "Use this for general questions about a named CVE.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -51,38 +56,50 @@ class Tools:
         }
     ]
 
-    def search_priorities(self, question: str):
-        relevant = self.priority_retrieval_service.priority_semantic_search(question)
-        return self.priority_retrieval_service.build_priority_context_from_metadata(relevant)
-
     def execute_tool(self, name: str, args: dict) -> str:
         if name not in self._dispatch:
             raise ValueError(f"Unknown tool: {name}")
         return self._dispatch[name](**args)
 
+    def search_priorities(self, question: str):
+        relevant = self.priority_retrieval_service.priority_semantic_search(question)
+        return self.priority_retrieval_service.build_priority_context_from_metadata(relevant)
 
-    def lookup_priority_by_cve(self, cve_id: str) -> str:
-        results = self.priority_repository.get_by_cve_id(cve_id)
-        if not results:
-            return f"No priority record found for {cve_id}."
+    def lookup_cve_details(self, cve_id: str) -> str:
+        """
+        Tool combining VulnerabilityRepository and PriorityRepository lookup - to deal with questions
+        about a CVE that exists in the DB and has organisation expousre (affects an asset).
+        Also, questions about a CVE which exists in the DB but no org exposure - should state this.
+        Finally, questions about a CVE that doesn't exist in the DB at all, response should be explicit,
+        rather than model guessing.
+        :param cve_id: CVE from the question
+        :return: response from the model
+        """
+        vulnerability = self.vulnerability_repository.get_by_cve_id(cve_id)
+        if not vulnerability:
+            return f"{cve_id} was not found in the vulnerability database."
 
-        # adapting SQLite results (ORM object, uses attribute access ie priority.cveid)
-        # to dict (key access, ie priority["cve_id"]) to pass into the build context method
-        # - which expects a dict bc ChromaDB .query method returns a dict
-        as_dicts = [
-            {
-                "asset_id": r.asset_id,
-                "cve_id": r.cve_id,
-                "ssvc_decision": r.ssvc_decision,
-                "remediation_days": r.remediation_days,
-                "automatable": r.automatable,
-                "technical_impact": r.technical_impact,
-            }
-            for r in results
-        ]
-        return self.priority_retrieval_service.build_priority_context_from_metadata(as_dicts)
+        priority_results = self.priority_repository.get_by_cve_id(cve_id)
+        parts = [f"CVE: {vulnerability.cve_id}\nDescription: {vulnerability.description}"]  # adjust to real fields
 
-    # todo
-    # third tool combining VulnerabilityRepository and PriorityRepository — a question about a CVE with no
-    # asset match should ideally still get something back ("this CVE exists, no organisational exposure found"),
-    # rather than either an empty tool result or, worse, the model guessing.
+        if priority_results:
+            # adapting SQLite results (ORM object, uses attribute access ie priority.cveid)
+            # to dict (key access, ie priority["cve_id"]) to pass into the build context method
+            # - which expects a dict bc ChromaDB .query method returns a dict
+            as_dicts = [ #todo as dicts conversion being done a lot, ORM > dict mapping happens a lot = extract
+                {
+                    "asset_id":  p.asset_id,
+                    "cve_id": p.cve_id,
+                    "ssvc_decision": p.ssvc_decision,
+                    "remediation_days": p.remediation_days,
+                    "automatable": p.automatable,
+                    "technical_impact": p.technical_impact,
+                } for p in priority_results
+            ]
+            parts.append(self.priority_retrieval_service.build_priority_context_from_metadata(as_dicts))
+        else:
+            parts.append("No organisational exposure found — this CVE is not linked to any tracked assets.")
+
+        return "\n\n".join(parts)
+
+

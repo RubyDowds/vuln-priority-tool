@@ -26,7 +26,18 @@ class AgentLoop:
         Model only emits a request (function name + arguments as json) inside its response.
         """
         # Create a running input list we will add to over time
-        input_list = [{"role": "user", "content": question}]
+        input_list = [
+            {
+                "role": "developer",
+                "content": (
+                    "You are a security analyst assistant with access to tools that query "
+                    "real prioritisation and vulnerability data. Always use the available "
+                    "tools to look up relevant data before asking the user a clarifying "
+                    "question. Only ask for clarification if a tool returns no relevant results."
+                ),
+            },
+            {"role": "user", "content": question},
+        ]
         max_iterations = 5
 
         for _ in range(max_iterations):
