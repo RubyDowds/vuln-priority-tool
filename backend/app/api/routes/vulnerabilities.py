@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies import get_orchestrator
+# from app.api.dependencies import get_orchestrator
 from app.orchestration.priority_analysis_orchestrator import PriorityAnalysisOrchestrator
 
 router = APIRouter()
