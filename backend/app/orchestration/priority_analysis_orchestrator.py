@@ -1,6 +1,6 @@
 """
-Answers questions against already-computed priority data, now also the home for agent tool logic.
-Runs per-request, every time someone asks something.
+Executes RAG pipeline from user query through semantic search
+Augments through building priority context from metadata, calls LLM.
 """
 import logging
 from openai import OpenAI
@@ -13,7 +13,9 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-
+"""
+OLD orchestrator (since replaced with Agent loop) 
+"""
 class PriorityAnalysisOrchestrator:
     MODEL = "gpt-4o-mini"
 

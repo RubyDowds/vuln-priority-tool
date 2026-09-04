@@ -17,12 +17,12 @@ class AnalyseRequest(BaseModel):
 class AnalyseResponse(BaseModel):
     answer: str
 
-#todo not sure what im using this for
-@router.post("/analyse", response_model=AnalyseResponse)
-def analyse(
-        request: AnalyseRequest,
-        orchestrator: PriorityAnalysisOrchestrator = Depends(get_orchestrator),
-):
-    answer = orchestrator.analyse(
-        question=request.question)
-    return AnalyseResponse(answer=answer)
+# #todo not sure what im using this for
+# @router.post("/analyse", response_model=AnalyseResponse)
+# def analyse(
+#         request: AnalyseRequest,
+#         orchestrator: PriorityAnalysisOrchestrator = Depends(get_orchestrator),
+# ):
+#     answer = orchestrator.analyse(
+#         question=request.question)
+#     return AnalyseResponse(answer=answer)
