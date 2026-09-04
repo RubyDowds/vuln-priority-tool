@@ -57,44 +57,22 @@ class AssetRepository:
 
         self.session.commit()
 
-    def get_all(self) -> list[Asset]:
-        return self.session.query(Asset).all()
-
     def get_by_id(self, asset_id: str):
         return self.session.query(Asset).filter(Asset.asset_id == asset_id).first()
 
-    # SEARCH METHOD(S) BELOW
-    def search(self,
-               asset_id: str | None = None,
-               asset_type: str | None = None,
-               internet_facing: bool | None = None,
-               business_criticality: str | None = None, ) -> list[Asset] | Asset | None:
-        q = self.session.query(Asset)
+    # def get_vulnerabilities_for_asset(self, asset_id: str) -> list[AssetVulnerability]:
+    #     return (
+    #         self.session.query(AssetVulnerability)
+    #         .filter(AssetVulnerability.asset_id == asset_id)
+    #         .all()
+    #     )
 
-        if asset_id:
-            return q.filter(Asset.asset_id == asset_id).first()
-        if asset_type:
-            q = q.filter(Asset.asset_type == asset_type)
-        if internet_facing is not None:
-            q = q.filter(Asset.internet_facing == internet_facing)
-        if business_criticality:
-            q = q.filter(Asset.business_criticality == business_criticality)
-
-        return q.all()
-
-    def get_vulnerabilities_for_asset(self, asset_id: str) -> list[AssetVulnerability]:
-        return (
-            self.session.query(AssetVulnerability)
-            .filter(AssetVulnerability.asset_id == asset_id)
-            .all()
-        )
-
-    def get_assets_for_vulnerabilities(self, cve_id: str) -> list[AssetVulnerability]:
-        return (
-            self.session.query(AssetVulnerability)
-            .filter(AssetVulnerability.cve_id == cve_id)
-            .all()
-        )
+    # def get_assets_for_vulnerabilities(self, cve_id: str) -> list[AssetVulnerability]:
+    #     return (
+    #         self.session.query(AssetVulnerability)
+    #         .filter(AssetVulnerability.cve_id == cve_id)
+    #         .all()
+    #     )
 
     def get_all_asset_vulnerabilities(self):
         return self.session.query(AssetVulnerability).all()

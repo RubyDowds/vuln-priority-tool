@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from app.api.dependencies import get_priority_repository, get_orchestrator
+from app.api.dependencies import get_agent_loop
 from app.repositories.priority_repository import PriorityRepository
+from app.orchestration.agent_loop import AgentLoop
 
 router = APIRouter(prefix="/priorities", tags=["priorities"])
 
@@ -52,7 +54,8 @@ def get_priorities_for_asset(
 @router.post("/analyse", response_model=AnalyseResponse)
 def analyse(
     request: AnalyseRequest,
-    orchestrator = Depends(get_orchestrator)
+    # orchestrator = Depends(get_orchestrator) # old orchestrator
+    agent_loop: AgentLoop = Depends(get_agent_loop), # new agent loop
 ):
-    answer = orchestrator.analyse(question=request.question)
+    answer = agent_loop.run_agent(question=request.question)
     return AnalyseResponse(answer=answer)
