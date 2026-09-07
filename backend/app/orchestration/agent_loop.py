@@ -38,6 +38,8 @@ class AgentLoop:
             },
             {"role": "user", "content": question},
         ]
+        tools_called = []
+        tool_outputs = []
         max_iterations = 5
 
         for _ in range(max_iterations):
@@ -53,13 +55,17 @@ class AgentLoop:
             input_list += response.output
             self.logger.debug(input_list)
             tool_calls = [item for item in response.output if item.type == "function_call"]
+            tools_called.extend(item.name for item in tool_calls)
+
+            # model is done as it returned text, no more tools needed
             if not tool_calls:
-                return response.output_text  # model is done as it returned text, no more tools needed
+                return {"answer": response.output_text, "tools_called": tools_called, "tool_outputs": tool_outputs}
 
             # Execute code on application side with input from tool call - bit that acc executes the functions
             for item in tool_calls:
                 args = json.loads(item.arguments)
                 result = self.tools.execute_tool(item.name, args)
+                tool_outputs.append(result)
                 input_list.append({
                     "type": "function_call_output",
                     "call_id": item.call_id,
@@ -67,10 +73,12 @@ class AgentLoop:
                 })
                 print(input_list)
 
-
         # hard cap as a max-iterations guard
-        return "Max iterations reached without a final answer."
-
+        return {
+            "answer": "Max iterations reached without a final answer.",
+            "tools_called": tools_called,
+            "tool_outputs": tool_outputs,
+        }
 
 
 

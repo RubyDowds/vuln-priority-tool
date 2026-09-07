@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from app.api.dependencies import get_priority_repository, get_orchestrator
+from app.api.dependencies import get_priority_repository
 from app.api.dependencies import get_agent_loop
 from app.repositories.priority_repository import PriorityRepository
 from app.orchestration.agent_loop import AgentLoop
@@ -57,5 +57,5 @@ def analyse(
     # orchestrator = Depends(get_orchestrator) # old orchestrator
     agent_loop: AgentLoop = Depends(get_agent_loop), # new agent loop
 ):
-    answer = agent_loop.run_agent(question=request.question)
-    return AnalyseResponse(answer=answer)
+    response = agent_loop.run_agent(question=request.question)
+    return AnalyseResponse(answer=response["answer"])

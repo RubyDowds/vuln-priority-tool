@@ -7,17 +7,17 @@ from app.orchestration.priority_analysis_orchestrator import PriorityAnalysisOrc
 
 router = APIRouter()
 
-#todo also remove?
-class AnalyseRequest(BaseModel):
-    question: str
-    vendor: str | None = None
-    product: str | None = None
-    days: int | None = None
 
-class AnalyseResponse(BaseModel):
-    answer: str
+# class AnalyseRequest(BaseModel):
+#     question: str
+#     vendor: str | None = None
+#     product: str | None = None
+#     days: int | None = None
+#
+# class AnalyseResponse(BaseModel):
+#     answer: str
 
-# #todo not sure what im using this for
+# #todo this was old, keeping route, might return
 # @router.post("/analyse", response_model=AnalyseResponse)
 # def analyse(
 #         request: AnalyseRequest,

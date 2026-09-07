@@ -19,9 +19,6 @@ def get_session():
     finally:
         db.close()
 
-# def get_priority_embedding_service(repo=Depends(get_repository)) -> PriorityEmbeddingService:
-#     return PriorityEmbeddingService(repo)
-
 def get_priority_repository(session: Session = Depends(get_session)) -> PriorityRepository:
     return PriorityRepository(session)
 
