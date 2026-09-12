@@ -36,11 +36,6 @@ if __name__ == "__main__":
         )
         orchestrator.run_prioritisation()
 
-        # check results
-        immediate = priority_repo.get_immediate()
-        print(f"\nImmediate (patch in 3 days): {len(immediate)}")
-        for p in immediate[:5]:  # print first 5
-            print(f"  {p.cve_id} on {p.asset_id} — {p.reasoning}")
 
     finally:
         session.close()
