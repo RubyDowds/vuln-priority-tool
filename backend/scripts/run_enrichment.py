@@ -22,7 +22,10 @@ if __name__ == "__main__":
     try:
         vuln_repo = VulnerabilityRepository(session)
 
-        nvd_client = NVDClient(api_key=os.getenv("NVD_API_KEY"))
+        nvd_api_key = os.getenv("NVD_API_KEY")
+        if not nvd_api_key:
+            raise ValueError("NVD_API_KEY environment variable is required but not set.")
+        nvd_client = NVDClient(api_key=nvd_api_key)
         epss_client = EpssClient()
 
         nvd_enrichment_service = NVDEnrichmentService(vuln_repo)

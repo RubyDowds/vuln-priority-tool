@@ -9,7 +9,7 @@ from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.enrichment.nvd_enrichment_service import NVDEnrichmentService
 from app.repositories.asset_repository import AssetRepository
 from app.repositories.priority_repository import PriorityRepository
-from app.prioritisation.sscv_decision_engine import SSVCDecisionEngine
+from app.prioritisation.ssvc_decision_engine import SSVCDecisionEngine
 from app.orchestration.prioritisation_orchestrator import PrioritisationOrchestrator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -36,11 +36,6 @@ if __name__ == "__main__":
         )
         orchestrator.run_prioritisation()
 
-        # check results
-        immediate = priority_repo.get_immediate()
-        print(f"\nImmediate (patch in 3 days): {len(immediate)}")
-        for p in immediate[:5]:  # print first 5
-            print(f"  {p.cve_id} on {p.asset_id} — {p.reasoning}")
 
     finally:
         session.close()

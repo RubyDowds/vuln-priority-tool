@@ -1,9 +1,9 @@
 """
-Orchestrator to run the prioritisation. Gets all AssetVulnerability pairs from the DB, for each pair,
-fetches Asset and Vulnerability objects, before passing them to the Decision Engine and persisting the
-results via the PriorityRepository.
+Orchestrator to run the prioritisation once. Gets all AssetVulnerability pairs from the DB, for each pair,
+fetches Asset and Vulnerability objects, before passing them to the SSVC Decision Engine and persisting the
+results via the PriorityRepository. This is the write path.
 """
-from app.prioritisation.sscv_decision_engine import SSVCDecisionEngine
+from app.prioritisation.ssvc_decision_engine import SSVCDecisionEngine
 from app.repositories.asset_repository import AssetRepository
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.repositories.priority_repository import PriorityRepository

@@ -1,5 +1,8 @@
 """
-Persists the output of the Decision Engine into the RemediationPriority table.
+Queries RemediationPriority table which holds output of SSVC decision engine
+(asset_id, cve_id) pairing, plus a decision (immediate, defer etc),
+remediation timeline, technical impact rating.
+The actual asset-specific prioritisation which the app depends on.
 """
 from sqlalchemy.dialects.sqlite import insert
 from app.models.db.remediation_priority import RemediationPriority
@@ -37,5 +40,12 @@ class PriorityRepository:
         return (
             self.session.query(RemediationPriority)
             .order_by(RemediationPriority.remediation_days.asc())
+            .all()
+        )
+
+    def get_by_cve_id(self, cve_id: str) -> list[RemediationPriority]:
+        return (
+            self.session.query(RemediationPriority)
+            .filter(RemediationPriority.cve_id == cve_id)
             .all()
         )
