@@ -3,7 +3,7 @@
 from app.db.database import SessionLocal, Base, engine
 from app.ingestion.vulnerability_ingestion_service import VulnerabilityIngestionService
 
-if __name__ == "__main__":
+def main():
     Base.metadata.create_all(bind=engine)
     session = SessionLocal()
     try:
@@ -12,3 +12,6 @@ if __name__ == "__main__":
         print("Ingestion complete")
     finally:
         session.close()
+
+if __name__ == "__main__":
+   main()

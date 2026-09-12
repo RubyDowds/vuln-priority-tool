@@ -14,8 +14,7 @@ from app.orchestration.prioritisation_orchestrator import PrioritisationOrchestr
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-
-if __name__ == "__main__":
+def main():
     load_dotenv(find_dotenv())  # walks up the directory tree until it finds a .env file
     Base.metadata.create_all(engine)
 
@@ -26,8 +25,6 @@ if __name__ == "__main__":
         priority_repo = PriorityRepository(session)
         decision_engine = SSVCDecisionEngine()
 
-        client = NVDClient(api_key=os.getenv("NVD_API_KEY"))
-        enrichment_service = NVDEnrichmentService(vuln_repo)
         orchestrator = PrioritisationOrchestrator(
             asset_repository=asset_repo,
             vuln_repository=vuln_repo,
@@ -39,4 +36,7 @@ if __name__ == "__main__":
 
     finally:
         session.close()
+
+if __name__ == "__main__":
+    main()
 
