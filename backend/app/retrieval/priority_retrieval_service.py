@@ -1,3 +1,5 @@
+import logging
+
 from sentence_transformers import SentenceTransformer
 
 from app.repositories.priority_repository import PriorityRepository
@@ -9,6 +11,7 @@ class PriorityRetrievalService:
         self.repository = repository  # init take the repository, to read from sqlite
         self.model = SentenceTransformer("all-MiniLM-L6-v2")  # model to convert text dense vectors
         self.collection = chroma_client.get_priorities_collection()
+        self.logger = logging.getLogger(__name__)
 
     def priority_semantic_search(self, question: str, n_results: int = 5) -> list[dict]:
         """
@@ -37,8 +40,8 @@ class PriorityRetrievalService:
             n_results=n_results,
             where=where_filter
         )
-        print("Retrieved metadatas:", results["metadatas"][0])
-        print("Distances:", results["distances"][0])
+        self.logger.debug(f"Retrieved metadatas: {results['metadatas'][0]}")
+        self.logger.debug(f"Distances: {results['distances'][0]}")
 
         return results["metadatas"][0]  # returns list of metadata dicts (unwrapping the list of lists with [0])
 

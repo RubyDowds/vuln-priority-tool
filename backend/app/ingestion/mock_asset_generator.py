@@ -1,4 +1,6 @@
 import random
+import logging
+
 from faker import Faker
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.repositories.asset_repository import AssetRepository
@@ -13,7 +15,7 @@ class MockAssetGenerator:
     def __init__(self, vuln_repository: VulnerabilityRepository, asset_repository: AssetRepository):
         self.vuln_repository = vuln_repository
         self.asset_repository = asset_repository
-
+        self.logger = logging.getLogger(__name__)
 
     def generate_assets(self, count: int = 50) -> list[dict]:
         assets = []
@@ -56,7 +58,7 @@ class MockAssetGenerator:
         self.asset_repository.upsert_all(assets)
         self.asset_repository.insert_scan_results(scan_results)
 
-        print(f"Generated {len(assets)} assets and {len(scan_results)} scan results")
+        self.logger.info(f"Generated {len(assets)} assets and {len(scan_results)} scan results")
 
 
 

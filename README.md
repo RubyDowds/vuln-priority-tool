@@ -1,28 +1,19 @@
 # vuln-priority-tool
 
-Vulnerability remediation prioritisation aligned to CISA's BOD 26-04 directive, which is built on SSVC decision logic, enriched with NVD/EPSS data, with a RAG-based AI layer for natural-language analysis, now being rearchitected into an agentic tool-calling system.
+Vulnerability remediation prioritisation aligned to CISA's BOD 26-04 directive, built on SSVC decision logic and enriched with NVD/EPSS data, with an agentic AI layer that reasons over the data using tool-calling to answer natural-language questions.
 
 ## Why
 
-CISA's [BOD 26-04](https://www.cisa.gov/) directive moves federal vulnerability remediation away from raw CVSS severity scores toward **SSVC** (Stakeholder-Specific Vulnerability Categorization) - reasoning about exploitation likelihood, technical impact, and asset context rather than a single numeric score. This project implements that decision logic end-to-end: ingest known-exploited vulnerabilities, enrich them with live NVD/EPSS data, run them through an SSVC decision engine, and let an LLM layer answer natural-language questions grounded in the resulting prioritisation data.
+CISA's [BOD 26-04](https://www.cisa.gov/) directive moves federal vulnerability remediation away from raw CVSS severity scores toward **SSVC** (Stakeholder-Specific Vulnerability Categorization) - reasoning about exploitation likelihood, technical impact, and asset context rather than a single numeric score. This project implements that decision logic end-to-end: ingest known-exploited vulnerabilities, enrich them with live NVD/EPSS data, run them through an SSVC decision engine, and let an AI agent answer natural-language questions grounded in the resulting prioritisation data.
 
-## Current status
+## What it does
 
-**Working, on `main`:**
-- CISA KEV ingestion, NVD/EPSS enrichment pipeline
-- SSVC decision engine producing remediation priorities per CVE/asset pair
-- ChromaDB semantic retrieval over both vulnerability and priority data
-- RAG-based Q&A: retrieve relevant priorities → build context → generate a grounded answer via `gpt-4o-mini`
-- FastAPI backend + Streamlit dashboard, containerised with Docker Compose
+Ask it things like:
 
-**In progress, on `agentic-loop`:**
-Rearchitecting the fixed RAG pipeline into a genuine agent loop using OpenAI's tool-calling API. Instead of always following one hardcoded retrieve-then-generate sequence, the model decides (per question) which tool(s) it needs and in what order, observing each tool's output before deciding its next step.
+- *"What should I patch immediately?"* - the agent searches prioritisation data semantically and summarises the most urgent decisions.
+- *"Tell me about CVE-2022-31199"* - the agent looks up the CVE directly, combining raw vulnerability facts with any organisational exposure (or honestly reporting that none exists, or that the CVE isn't in the data at all).
 
-- ✅ Core agent loop (reason → act → observe, repeating until the model has enough to answer)
-- ✅ First tool: `search_priorities`, wrapping the existing semantic retrieval as a callable the model can choose to invoke
-- [TODO] Second tool: exact-match CVE/asset lookup (structured SQLite query, as a genuine alternative retrieval strategy alongside semantic search)
-- [TODO] Session memory across questions
-- [TODO] Evals redesigned around tool-selection correctness and trajectory quality, not just single-pass answer faithfulness
+The agent decides for itself which tool it needs, per question, rather than following one fixed pipeline - it reasons, calls a tool, observes the result, and repeats until it has enough to answer.
 
 ## Architecture
 
@@ -45,6 +36,10 @@ CISA KEV / NVD / EPSS
   FastAPI ──► Streamlit dashboard / chat
 ```
 
+**The agent loop** has three tools available to it:
+- `search_priorities` - semantic search over prioritisation decisions, for open-ended questions
+- `lookup_cve_details` - exact lookup for a named CVE, combining vulnerability facts with organisational exposure (or an honest "not found" / "no exposure" if either is missing)
+
 ## Tech stack
 
 - **Backend:** FastAPI, SQLAlchemy + SQLite
@@ -52,41 +47,69 @@ CISA KEV / NVD / EPSS
 - **LLM / agent layer:** OpenAI API (`gpt-4o-mini`), tool/function calling
 - **Frontend:** Streamlit
 - **Infra:** Docker, Docker Compose
-- **Evals:** RAGAS (being reworked for trajectory-level evaluation)
+- **Evals:** RAGAS (faithfulness/relevancy), plus a custom tool-selection accuracy harness
 
 ## Running locally
 
-Requires Python 3.12 and an OpenAI API key.
+Requires Python 3.12, an [OpenAI API key](https://platform.openai.com/api-keys), and a free [NVD API key](https://nvd.nist.gov/developers/request-an-api-key).
 
+**1. Clone and set up a virtual environment:**
 ```bash
 git clone https://github.com/RubyDowds/vuln-priority-tool.git
 cd vuln-priority-tool
-pip install -r backend/requirements.txt -r frontend/requirements.txt
-export OPENAI_API_KEY=your-key-here
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-**First run: set up the database, enrichment, and embeddings:**
+**2. Install dependencies:**
+```bash
+pip install -r backend/requirements.txt -r frontend/requirements.txt
+```
+
+**3. Set required environment variables:**
+```bash
+export OPENAI_API_KEY=your-key-here
+export NVD_API_KEY=your-key-here
+```
+
+**4. First run — set up the database, enrichment, and embeddings:**
 ```bash
 cd backend
 python -m scripts.complete_setup
 ```
-This runs CISA KEV ingestion, mock asset generation, NVD/EPSS enrichment, and SSVC prioritisation end-to-end.
+This runs CISA KEV ingestion, mock asset generation, NVD/EPSS enrichment, prioritisation, and embedding, end to end. Safe to re-run from scratch at any point.
 
-**Start the backend:**
+**5. Start the backend:**
 ```bash
-cd backend
 uvicorn app.api.main:app --reload
 ```
 
-**Start the frontend, in a separate terminal, from the project root:**
+**6. Start the frontend, in a separate terminal, from the project root:**
 ```bash
 streamlit run frontend/app.py
 ```
 
 Dashboard: `http://localhost:8501`
 
-> A `docker-compose.yml` is included for containerised deployment but is currently unverified, the manual setup above is the confirmed working path.
+> A `docker-compose.yml` is included for containerised deployment but is currently unverified — the manual setup above is the confirmed working path.
+
+### Querying it directly
+
+Via the API, without the dashboard:
+```bash
+curl -X POST http://localhost:8000/priorities/analyse \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What should I patch immediately?"}'
+```
+
+### Running the evals
+
+```bash
+cd backend
+python -m scripts.run_agent_evals        # tool-selection accuracy across repeated runs
+python -m scripts.run_faithfulness_evals # RAGAS faithfulness/relevancy on final answers
+```
 
 ## Data
 
-Uses public CISA KEV data plus enrichment from NVD and EPSS. Asset data is synthetic, generated with Faker, no real infrastructure or organisational data is represented.
+Uses public CISA KEV data plus enrichment from NVD and EPSS. Asset data is synthetic, generated with Faker - no real infrastructure or organisational data is represented.

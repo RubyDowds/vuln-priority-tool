@@ -1,19 +1,28 @@
-# scripts/setup.py
 """
 First time setup - run this once to initialise the full pipeline.
-After this, run ingest + enrichment + prioritisation daily.
+After this, run ingest + enrichment + prioritisation + embedding daily.
 """
-import subprocess
-import sys
+import logging
 
-scripts = [
-    "scripts.ingest_cisa_kev_script",
-    "scripts.generate_mock_assets",
-    "scripts.run_enrichment",
-    "scripts.run_prioritisation",
+from scripts.ingest_cisa_kev import main as ingest_cisa_kev
+from scripts.generate_mock_assets import main as generate_mock_assets
+from scripts.run_enrichment import main as run_enrichment
+from scripts.run_prioritisation import main as run_prioritisation
+from scripts.embed_priorities import main as embed_priorities
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+steps = [
+    ("Ingesting CISA KEV data", ingest_cisa_kev),
+    ("Generating mock assets", generate_mock_assets),
+    ("Running enrichment", run_enrichment),
+    ("Running prioritisation", run_prioritisation),
+    ("Embedding priorities", embed_priorities),
 ]
 
-for script in scripts:
-    print(f"\nRunning {script}...")
-    result = subprocess.run([sys.executable, "-m", script], check=True)
-    print(f"Completed {script}")
+if __name__ == "__main__":
+    for label, step in steps:
+        logger.info(f"\n{label}...")
+        step()
+        logger.info(f"Completed: {label}")
