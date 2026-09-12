@@ -24,7 +24,7 @@ class AssetRepository:
                 owner=asset['owner'],
             )
 
-            stmt.on_conflict_do_update(
+            stmt = stmt.on_conflict_do_update(
                 index_elements=['asset_id'],
                 set_={
                     'hostname': asset['hostname'],
@@ -59,20 +59,6 @@ class AssetRepository:
 
     def get_by_id(self, asset_id: str):
         return self.session.query(Asset).filter(Asset.asset_id == asset_id).first()
-
-    # def get_vulnerabilities_for_asset(self, asset_id: str) -> list[AssetVulnerability]:
-    #     return (
-    #         self.session.query(AssetVulnerability)
-    #         .filter(AssetVulnerability.asset_id == asset_id)
-    #         .all()
-    #     )
-
-    # def get_assets_for_vulnerabilities(self, cve_id: str) -> list[AssetVulnerability]:
-    #     return (
-    #         self.session.query(AssetVulnerability)
-    #         .filter(AssetVulnerability.cve_id == cve_id)
-    #         .all()
-    #     )
 
     def get_all_asset_vulnerabilities(self):
         return self.session.query(AssetVulnerability).all()
