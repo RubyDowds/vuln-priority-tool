@@ -3,6 +3,8 @@ Orchestrator to run the prioritisation once. Gets all AssetVulnerability pairs f
 fetches Asset and Vulnerability objects, before passing them to the SSVC Decision Engine and persisting the
 results via the PriorityRepository. This is the write path.
 """
+import logging
+
 from app.prioritisation.ssvc_decision_engine import SSVCDecisionEngine
 from app.repositories.asset_repository import AssetRepository
 from app.repositories.vulnerability_repository import VulnerabilityRepository
@@ -19,6 +21,7 @@ class PrioritisationOrchestrator:
         self.vuln_repository = vuln_repository
         self.decision_engine = decision_engine
         self.priority_repository = priority_repository
+        self.logger = logging.getLogger(__name__)
 
 
     def run_prioritisation(self):
@@ -32,5 +35,5 @@ class PrioritisationOrchestrator:
                 continue
 
             priority = self.decision_engine.compute(asset, vuln)
-            print(priority)
+            self.logger.debug(f"Computed priority: {priority}")
             self.priority_repository.upsert(priority)

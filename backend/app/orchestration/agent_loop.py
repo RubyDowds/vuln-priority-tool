@@ -4,11 +4,6 @@ import logging
 
 from app.orchestration.tools import Tools
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-
 class AgentLoop:
     MODEL = "gpt-4o-mini" # todo define elsewhere
 
@@ -43,7 +38,6 @@ class AgentLoop:
         max_iterations = 5
 
         for _ in range(max_iterations):
-            # self.logger.debug("Sending request with input list: ", input_list)
             response = self.client.responses.create(
                 model=self.MODEL,
                 tools=self.tools.tools,
@@ -59,11 +53,13 @@ class AgentLoop:
 
             # model is done as it returned text, no more tools needed
             if not tool_calls:
+                self.logger.info(f"Agent finished. Tools used: {tools_called}")
                 return {"answer": response.output_text, "tools_called": tools_called, "tool_outputs": tool_outputs}
 
             # Execute code on application side with input from tool call - bit that acc executes the functions
             for item in tool_calls:
                 args = json.loads(item.arguments)
+                self.logger.info(f"Agent selected tool: {item.name} with args: {args}")
                 result = self.tools.execute_tool(item.name, args)
                 tool_outputs.append(result)
                 input_list.append({
@@ -71,7 +67,6 @@ class AgentLoop:
                     "call_id": item.call_id,
                     "output": result,
                 })
-                print(input_list)
 
         # hard cap as a max-iterations guard
         return {
