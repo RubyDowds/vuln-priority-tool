@@ -56,14 +56,14 @@ class NVDEnrichmentService:
             cvss_list = metrics.get(version_key, [])
             for metric in cvss_list:
                 if metric.get("type") == "Primary":
-                    return self._parse_cvss(metric["cvssData"])
+                    return self._parse_cvss(metric.get("cvssData", {}))
 
         # Fallback to secondary when necessary
         for version_key in ["cvssMetricV31", "cvssMetricV30", "cvssMetricV40"]:
             cvss_list = metrics.get(version_key, [])
             for metric in cvss_list:
                 if metric.get("type") == "Secondary":
-                    return self._parse_cvss(metric["cvssData"])
+                    return self._parse_cvss(metric.get("cvssData", {}))
 
 
         return {"base_score": None, "cvss_vector": None, "cvss_severity": None}
@@ -89,7 +89,8 @@ class NVDEnrichmentService:
             self.logger.warning("No ssvc metrics found, returning default None for values")
             return {"exploitation": None, "automatable": None, "technical_impact": None, "ssvc_source": None}
 
-        options = ssvc_list[0].get("ssvcData").get("options", [])
+        ssvc_data = ssvc_list[0].get("ssvcData") or {}
+        options = ssvc_data.get("options", [])
         ssvc = {list(o.keys())[0]: list(o.values())[0] for o in options}
 
         return {
@@ -124,7 +125,7 @@ class NVDEnrichmentService:
         :param vuln: Stored Vulnerability object from SQLAlchemy
         :param enriched: Enrichment dictionary from NVD
         """
-        has_cvss = enriched.get("cvssVector") is not None
+        has_cvss = enriched.get("cvss_vector") is not None
         has_ssvc = enriched.get("automatable") is not None
 
         vuln.base_score = enriched.get("base_score")
