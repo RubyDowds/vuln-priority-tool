@@ -18,7 +18,7 @@ class EnrichmentOrchestrator:
         "pending": 0, # never been attempted, retry
         "not_enriched": 1, # no cvss/ssvc found, probably wasn't found in NVD so retry next day
         "cvss_only": 3, # has CVSS but no SSVC, retry after 3 days
-        "ssv_only": 3, # has SSVC but no CVSS, retry after 3 days
+        "ssvc_only": 3, # has SSVC but no CVSS, retry after 3 days
     }
 
     def __init__(
@@ -39,15 +39,15 @@ class EnrichmentOrchestrator:
     def run(self) -> None:
         pending = self._get_pending_enrichment()
 
-        if not pending:
+        if pending:
+            self.logger.info(f"Found {len(pending)} vulnerabilities pending enrichment.")
+            cve_ids = [v.cve_id for v in pending]
+
+            # NVD enrichment
+            nvd_data = self.nvd_client.fetch_all(cve_ids)
+            self.enrichment_service.enrich(nvd_data)
+        else:
             self.logger.info("No vulnerabilities pending enrichment.")
-
-        self.logger.info("Found {} vulnerabilities ending enrichment.".format(pending))
-        cve_ids = [v.cve_id for v in pending]
-
-        # NVD enrichment
-        nvd_data = self.nvd_client.fetch_all(cve_ids)
-        self.enrichment_service.enrich(nvd_data)
 
         # EPSS enrichment - run for all CVEs, not just pending, as they change daily
         all_cve_ids = [v.cve_id for v in self.repository.get_all()]
