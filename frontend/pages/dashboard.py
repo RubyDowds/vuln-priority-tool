@@ -62,12 +62,12 @@ if filtered:
     df = pd.DataFrame(filtered)
     df = df[[
         "asset_id", "cve_id", "ssvc_decision",
-        "remediation_days", "automatable",
+        "remediation_days", "forensic_triage_required", "automatable",
         "technical_impact", "reasoning"
     ]]
     df.columns = [
         "Asset", "CVE", "Decision",
-        "Days", "Automatable",
+        "Days", "Forensic Triage", "Automatable",
         "Technical Impact", "Reasoning"
     ]
     st.dataframe(df, use_container_width=True, hide_index=True)

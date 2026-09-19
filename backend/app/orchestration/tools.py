@@ -92,6 +92,7 @@ class Tools:
                     "cve_id": p.cve_id,
                     "ssvc_decision": p.ssvc_decision,
                     "remediation_days": p.remediation_days,
+                    "forensic_triage_required": p.forensic_triage_required,
                     "automatable": p.automatable,
                     "technical_impact": p.technical_impact,
                 } for p in priority_results

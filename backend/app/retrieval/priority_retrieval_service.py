@@ -52,9 +52,11 @@ class PriorityRetrievalService:
 
         chunks = []
         for m in meta_data_list:
+            forensic_triage = m.get('forensic_triage_required')
+            forensic_triage_required = str(forensic_triage).lower() in ("true", "1")
             chunk = f"""Asset: {m.get('asset_id')}
                     CVE: {m.get('cve_id')}
-                    Decision: {m.get('ssvc_decision')} ({m.get('remediation_days')} days)
+                    Decision: {m.get('ssvc_decision')} ({m.get('remediation_days')} days{', forensic triage required' if forensic_triage_required else ''})
                     Automatable: {m.get('automatable')}
                     Technical Impact: {m.get('technical_impact')}""".strip()
             chunks.append(chunk)

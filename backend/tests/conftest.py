@@ -78,9 +78,11 @@ def make_asset_vulnerability():
 @pytest.fixture
 def make_remediation_priority():
     def _make(asset_id="asset-1", cve_id="CVE-2024-00001", ssvc_decision="immediate",
-              remediation_days=3, automatable=True, technical_impact="total", **overrides):
+              remediation_days=3, forensic_triage_required=False, automatable=True,
+              technical_impact="total", **overrides):
         return SimpleNamespace(asset_id=asset_id, cve_id=cve_id, ssvc_decision=ssvc_decision,
-                                remediation_days=remediation_days, automatable=automatable,
+                                remediation_days=remediation_days,
+                                forensic_triage_required=forensic_triage_required, automatable=automatable,
                                 technical_impact=technical_impact, **overrides)
     return _make
 

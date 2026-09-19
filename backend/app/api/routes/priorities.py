@@ -14,6 +14,7 @@ class PriorityResponse(BaseModel):
     cve_id: str
     ssvc_decision: str
     remediation_days: int | None
+    forensic_triage_required: bool
     publicly_exposed: bool
     in_kev: bool
     automatable: bool
