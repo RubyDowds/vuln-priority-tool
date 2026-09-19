@@ -14,7 +14,7 @@ class EpssEnrichmentService:
 
     def enrich(self, epss_data: list[dict]) -> None:
         for item in epss_data:
-            cve_id = item["cve"]
+            cve_id = item.get("cve")
             if not cve_id:
                 continue
 
@@ -23,8 +23,14 @@ class EpssEnrichmentService:
                 self.logger.info(f"{cve_id} not found in local DB, skipping")
                 continue
 
-            vuln.epss_score = item["epss"]
-            vuln.epss_percentile = item["percentile"]
+            epss_score = item.get("epss")
+            percentile = item.get("percentile")
+            if epss_score is None or percentile is None:
+                self.logger.warning(f"{cve_id} missing epss/percentile in response, skipping")
+                continue
+
+            vuln.epss_score = epss_score
+            vuln.epss_percentile = percentile
 
             self.repository.save(vuln)
 

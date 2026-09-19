@@ -6,6 +6,8 @@ import pytest
 
 from app.orchestration.agent_loop import AgentLoop
 from app.orchestration.tools import Tools
+from app.prioritisation.ssvc_decision_engine import SSVCDecisionEngine
+from app.repositories.asset_repository import AssetRepository
 from app.repositories.priority_repository import PriorityRepository
 from app.repositories.vulnerability_repository import VulnerabilityRepository
 from app.retrieval.priority_retrieval_service import PriorityRetrievalService
@@ -27,6 +29,16 @@ def mock_vulnerability_repository():
 
 
 @pytest.fixture
+def mock_asset_repository():
+    return Mock(spec=AssetRepository)
+
+
+@pytest.fixture
+def mock_decision_engine():
+    return Mock(spec=SSVCDecisionEngine)
+
+
+@pytest.fixture
 def mock_priority_retrieval_service():
     # spec=PriorityRetrievalService never calls __init__, so the real SentenceTransformer/
     # ChromaDB construction it does is never triggered.
@@ -42,6 +54,24 @@ def tools(mock_priority_repository, mock_priority_retrieval_service, mock_vulner
 def make_vulnerability():
     def _make(cve_id="CVE-2024-00001", description="A test vulnerability description.", **overrides):
         return SimpleNamespace(cve_id=cve_id, description=description, **overrides)
+    return _make
+
+
+@pytest.fixture
+def make_asset():
+    def _make(asset_id="asset-1", hostname="host-1", ip_address="10.0.0.1", internet_facing=True,
+              asset_type="server", business_criticality="high", owner="team-a", **overrides):
+        return SimpleNamespace(asset_id=asset_id, hostname=hostname, ip_address=ip_address,
+                                internet_facing=internet_facing, asset_type=asset_type,
+                                business_criticality=business_criticality, owner=owner, **overrides)
+    return _make
+
+
+@pytest.fixture
+def make_asset_vulnerability():
+    def _make(asset_id="asset-1", cve_id="CVE-2024-00001", detected_date=None, remediated=False, **overrides):
+        return SimpleNamespace(asset_id=asset_id, cve_id=cve_id, detected_date=detected_date,
+                                remediated=remediated, **overrides)
     return _make
 
 
