@@ -26,12 +26,14 @@ class PriorityEmbeddingService:
         documents = [ # this gets embedded — what semantic search matches against
             f"{p.cve_id} on {p.asset_id} is {p.ssvc_decision} — {p.reasoning}. "
             f"Technical impact: {p.technical_impact}. Automatable: {p.automatable}."
+            + (" Forensic triage required." if p.forensic_triage_required else "")
             for p in all_priorities ]
         metadatas = [{
             "asset_id": p.asset_id,
             "cve_id": p.cve_id,
             "ssvc_decision": p.ssvc_decision,
             "remediation_days": p.remediation_days or 0,
+            "forensic_triage_required": str(p.forensic_triage_required),
             "automatable": str(p.automatable),
             "technical_impact": p.technical_impact or "unknown"
         } for p in all_priorities]  # structured data returned alongside results, not embedded

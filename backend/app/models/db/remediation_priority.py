@@ -14,6 +14,7 @@ class RemediationPriority(Base):
     # SSVC decision output
     ssvc_decision = Column(String)  # "immediate", "out-of-cycle", "scheduled", "defer"
     remediation_days = Column(Integer, nullable=True)  # 3, 14, 60, None
+    forensic_triage_required = Column(Boolean, default=False)  # BOD 26-04 Table 1 "3 days & forensic triage" rows
 
     # the four factors used to make the decision - stored for explainability
     publicly_exposed = Column(Boolean)

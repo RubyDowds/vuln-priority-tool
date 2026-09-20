@@ -81,9 +81,11 @@ def test_lookup_cve_details_found_with_exposure(tools, mock_vulnerability_reposi
     mock_priority_repository.get_by_cve_id.assert_called_once_with("CVE-2022-31199")
     expected_dicts = [
         {"asset_id": "asset-1", "cve_id": "CVE-2022-31199", "ssvc_decision": "immediate",
-         "remediation_days": 3, "automatable": True, "technical_impact": "total"},
+         "remediation_days": 3, "forensic_triage_required": False, "automatable": True,
+         "technical_impact": "total"},
         {"asset_id": "asset-2", "cve_id": "CVE-2022-31199", "ssvc_decision": "scheduled",
-         "remediation_days": 60, "automatable": False, "technical_impact": "partial"},
+         "remediation_days": 60, "forensic_triage_required": False, "automatable": False,
+         "technical_impact": "partial"},
     ]
     mock_priority_retrieval_service.build_priority_context_from_metadata.assert_called_once_with(expected_dicts)
     assert result == (
