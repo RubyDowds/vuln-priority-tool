@@ -31,20 +31,23 @@ class AnalyseRequest(BaseModel):
 class AnalyseResponse(BaseModel):
     answer: str
 
-# --- Endpoints ---
+# --- Endpoints (placeholders, some not in use yet) ---
 
+# Not in use yet
 @router.get("/", response_model=list[PriorityResponse])
 def get_all_priorities(
         repo: PriorityRepository = Depends(get_priority_repository)
 ):
     return repo.get_all()
 
+# Not in use yet
 @router.get("/immediate", response_model=list[PriorityResponse])
 def get_immediate_priorities(
         repo: PriorityRepository = Depends(get_priority_repository)
 ):
     return repo.get_immediate()
 
+# Not in use yet
 @router.get("/{asset_id}", response_model=list[PriorityResponse])
 def get_priorities_for_asset(
         asset_id: str,

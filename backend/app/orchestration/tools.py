@@ -68,7 +68,7 @@ class Tools:
     def lookup_cve_details(self, cve_id: str) -> str:
         """
         Tool combining VulnerabilityRepository and PriorityRepository lookup - to deal with questions
-        about a CVE that exists in the DB and has organisation expousre (affects an asset).
+        about a CVE that exists in the DB and has organisation exposure (affects an asset).
         Also, questions about a CVE which exists in the DB but no org exposure - should state this.
         Finally, questions about a CVE that doesn't exist in the DB at all, response should be explicit,
         rather than model guessing.
@@ -79,9 +79,13 @@ class Tools:
         if not vulnerability:
             return f"{cve_id} was not found in the vulnerability database."
 
-        priority_results = self.priority_repository.get_by_cve_id(cve_id)
-        parts = [f"CVE: {vulnerability.cve_id}\nDescription: {vulnerability.description}"]  # adjust to real fields
+        # todo should there be more CVE details included here, eg technical impact etc?
+        #  details just need to be in vuln repo - but i think there should be more for parts
+        #  What if priority results does return something tho, then it would be doubled up..
+        #  so the parts should be appended within the if statement?
+        parts = [f"CVE: {vulnerability.cve_id}\nDescription: {vulnerability.description}"]
 
+        priority_results = self.priority_repository.get_by_cve_id(cve_id)
         if priority_results:
             # adapting SQLite results (ORM object, uses attribute access ie priority.cveid)
             # to dict (key access, ie priority["cve_id"]) to pass into the build context method

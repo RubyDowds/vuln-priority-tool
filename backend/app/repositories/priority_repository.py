@@ -43,7 +43,12 @@ class PriorityRepository:
             .all()
         )
 
+
     def get_by_cve_id(self, cve_id: str) -> list[RemediationPriority]:
+        """
+        This method is used only for lookup_cve_details tool which uses a CVE to check for
+        organisational exposure. It may return an empty list for CVE with no org exposure.
+        """
         return (
             self.session.query(RemediationPriority)
             .filter(RemediationPriority.cve_id == cve_id)
