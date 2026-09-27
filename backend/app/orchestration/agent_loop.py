@@ -46,6 +46,7 @@ class AgentLoop:
             # Receive tool call from model - Save function call outputs for subsequent requests
             # input list is the running conversation transcript - the API is stateless, it has
             # no memory of previous turns unless I resend them
+            # todo why append input_list with response output here AND below with tool output
             input_list += response.output
             self.logger.debug(input_list)
             tool_calls = [item for item in response.output if item.type == "function_call"]
@@ -57,14 +58,15 @@ class AgentLoop:
                 return {"answer": response.output_text, "tools_called": tools_called, "tool_outputs": tool_outputs}
 
             # Execute code on application side with input from tool call - bit that acc executes the functions
+            # todo appending tool response to input_list for context for LLM next round
             for item in tool_calls:
-                args = json.loads(item.arguments)
+                args = json.loads(item.arguments) # todo how are the args being chosen?
                 self.logger.info(f"Agent selected tool: {item.name} with args: {args}")
                 result = self.tools.execute_tool(item.name, args)
                 tool_outputs.append(result)
                 input_list.append({
                     "type": "function_call_output",
-                    "call_id": item.call_id,
+                    "call_id": item.call_id, # how model knows which result belongs to which call
                     "output": result,
                 })
 
